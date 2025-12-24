@@ -1,6 +1,14 @@
 import streamlit as st
 
 st.set_page_config(page_title="Ekin Gayrimenkul Pro İlan", layout="wide")
+st.markdown(
+    """
+    <div style="text-align: center; margin-bottom: 40px;">
+        <img src="logo.png" width="420">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 st.title("🏠 EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU")
 st.markdown("Daire, dükkan, ofis, arsa... Her türlü emlak ilanınızı saniyeler içinde profesyonelce hazırlayın!")
 
