@@ -5,19 +5,19 @@ st.set_page_config(page_title="Ekin Gayrimenkul Pro İlan", layout="wide")
 st.image("logo.png", use_container_width=True)
 
 st.title("🏠 EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU")
-st.markdown("Daire, dükkan, ofis, arsa... Her türlü emlak ilanınızı saniyeler içinde profesyonelce hazırlayın!")
+st.markdown("Daire, dükkan, ofis, arsa, tarla... Her türlü emlak ilanınızı saniyeler içinde profesyonelce hazırlayın!")
 
 # 1. Emlak Türü ve İşlem Seçimi
 col_tur1, col_tur2 = st.columns(2)
 with col_tur1:
-    emlak_turu = st.selectbox("📌 Emlak Türü", ["Daire", "Dükkan / Mağaza", "Ofis / İşyeri", "Arsa"])
+    emlak_turu = st.selectbox("📌 Emlak Türü", ["Daire", "Dükkan / Mağaza", "Ofis / İşyeri", "Arsa", "Tarla"])
 with col_tur2:
     ilan_turu = st.radio("İşlem Türü", ["🟢 Satılık", "🔴 Kiralık"], horizontal=True)
 
 # 2. İlan Tonu
 st.subheader("📢 İlan Tonu Seçiniz")
-if emlak_turu == "Arsa":
-    ton_options = ["🌟 Yatırıma Çok Uygun", "🏡 İmarlı & Hazır", "💰 Fırsat Arsa"]
+if emlak_turu in ["Arsa", "Tarla"]:
+    ton_options = ["🌟 Yatırıma Çok Uygun", "🏡 İmarlı & Hazır", "💰 Fırsat Arazi"]
 else:
     if ilan_turu == "🟢 Satılık":
         ton_options = ["🌟 Ultra Lüks & Prestijli", "🏡 Modern & Konforlu", "💰 Fırsat & Yatırıma Uygun"]
@@ -47,7 +47,7 @@ with col_loc3:
 st.subheader("🔹 Temel Bilgiler")
 col1, col2, col3 = st.columns(3)
 
-# Değişkenleri önceden tanımla (güvenlik için)
+# Değişkenleri önceden tanımla
 oda_bilgi = ""
 kat_bilgi = ""
 fiyat_gir = ""
@@ -63,7 +63,8 @@ imar_durumu = ""
 cephe_metre = ""
 balkon_bilgi = ""
 teras_var = False
-kredi_uygun = "Bilinmiyor"  # Krediye Uygunluk
+kredi_uygun = "Bilinmiyor"
+yol_durumu = "Bilinmiyor"  # Yol Durumu
 
 with col1:
     if emlak_turu in ["Daire", "Dükkan / Mağaza", "Ofis / İşyeri"]:
@@ -76,20 +77,24 @@ with col1:
         depozito_gir = st.text_input("🔒 Depozito (rakam, örn: 50000)", value="")
 
 with col2:
-    if emlak_turu != "Arsa":
+    if emlak_turu in ["Arsa", "Tarla"]:
+        alan_donum = st.text_input(f"🌳 {'Arsa' if emlak_turu == 'Arsa' else 'Tarla'} Alanı (dönüm, örn: 5)")
+        imar_durumu = st.text_input("📜 İmar Durumu (örn: İmarsız, Konut İmarlı, Tarım Dışı)")
+        # Yol Durumu (Arsa ve Tarla için)
+        yol_durumu = st.selectbox("🛣️ Yol Durumu", 
+            ["Yol Cephesi Var", "Yol Cephesi Yok", "Yolu Açılmış (Resmi Yol Var)", 
+             "Stabilize Yol", "Asfalt Yol", "Bilinmiyor"])
+    else:
         alan_net = st.text_input("📏 Kullanılabilir Alan m² (örn: 120)")
         alan_brut = st.text_input("📐 Brüt / Toplam Alan m² (örn: 150)")
         bina_kat_sayisi = st.text_input("🏢 Bina Kat Sayısı (varsa)")
-    else:
-        arsa_m2 = st.text_input("🌳 Arsa Alanı m² (örn: 500)")
-        imar_durumu = st.text_input("📜 İmar Durumu (örn: Konut İmarlı, 0.60 Emsal)")
-    
-    # YENİ: Krediye Uygunluk (satılık ilanlarda her türde görünür)
+
+    # Krediye Uygunluk (satılık her türde)
     if ilan_turu == "🟢 Satılık":
         kredi_uygun = st.selectbox("🏦 Krediye Uygunluk", ["Evet", "Hayır", "Bilinmiyor"])
 
 with col3:
-    if emlak_turu != "Arsa":
+    if emlak_turu not in ["Arsa", "Tarla"]:
         yas = st.text_input("🏗️ Bina Yaşı (örn: Sıfır)")
         aidat = st.text_input("💸 Aidat / Ortak Gider (örn: 1200 TL)")
     if emlak_turu in ["Dükkan / Mağaza", "Ofis / İşyeri"]:
@@ -104,11 +109,11 @@ if emlak_turu == "Daire":
     with col_b2:
         teras_var = st.checkbox("🌿 Teraslı")
 
-# Isıtma & Klima (Çoklu seçim - Arsa hariç)
-if emlak_turu != "Arsa":
+# Isıtma & Klima (Arsa ve Tarla hariç)
+if emlak_turu not in ["Arsa", "Tarla"]:
     st.subheader("🌀 Isıtma & Klima Sistemi")
     isitma_secilen = st.multiselect(
-        "Birden fazla seçenek işaretleyebilirsiniz (örn: Kombi + Yerden Isıtma)",
+        "Birden fazla seçenek işaretleyebilirsiniz",
         [
             "Doğalgaz Kombi",
             "Yerden Isıtma",
@@ -119,8 +124,7 @@ if emlak_turu != "Arsa":
             "Kat Kaloriferi",
             "Sobalı",
             "Isıtma Yok"
-        ],
-        help="Gerçek hayatta birçok daire hem kombili hem yerden ısıtmalıdır."
+        ]
     )
 else:
     isitma_secilen = []
@@ -128,8 +132,10 @@ else:
 # Tapu (Sadece satılık)
 if ilan_turu == "🟢 Satılık":
     st.subheader("📜 Tapu Bilgileri")
-    tapu = st.multiselect("Tapu Durumu",
-        ["Kat Mülkiyeti", "Kat İrtifaklı", "Hisseli Tapu", "İskanlı", "İskansız", "Arsa Tapulu"])
+    tapu_options = ["Kat Mülkiyeti", "Kat İrtifaklı", "Hisseli Tapu", "İskanlı", "İskansız", "Arsa Tapulu"]
+    if emlak_turu == "Tarla":
+        tapu_options.append("Tarım Arazisi Tapusu")
+    tapu = st.multiselect("Tapu Durumu", tapu_options)
 else:
     tapu = []
 
@@ -146,7 +152,7 @@ with tab1:
 
 with tab2:
     bina_oz = []
-    if emlak_turu != "Arsa":
+    if emlak_turu not in ["Arsa", "Tarla"]:
         bina_oz = st.multiselect("Bina & Site özellikleri",
             ["Asansör", "Kapalı otopark", "Açık otopark", "7/24 güvenlik", "Kamera sistemi",
              "Site içinde", "Kapıcı", "Çocuk parkı", "Yüzme havuzu", "Spor salonu", "Jeneratör"])
@@ -168,7 +174,7 @@ with tab4:
         ["Deprem yönetmeliğine uygun", "Fiber internet", "Uydu altyapısı", "Eşyalı",
          "Takas mümkün", "Krediye uygun", "Kira getirisi yüksek"])
 
-# Tüm özellikleri birleştir (ısıtma + teras dahil)
+# Tüm özellikleri birleştir
 secilen_oz = konum_oz + manzara + bina_oz + ic_oz + cephe + teknik_oz + isitma_secilen
 if emlak_turu == "Daire" and teras_var:
     secilen_oz.append("Teraslı")
@@ -209,17 +215,18 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
                    "Değerini hızla katlayacak bu fırsatı değerlendirin!")
     }
 
-    if emlak_turu == "Arsa":
+    if emlak_turu in ["Arsa", "Tarla"]:
+        base_name = "ARSA" if emlak_turu == "Arsa" else "TARLA"
         ton_metni = {
-            "luks": ("EKİN GAYRİMENKUL'DEN YATIRIMA ÇOK UYGUN ARSA 🌟",
-                     "Şehrin gelişen bölgesinde, yüksek prim potansiyelli, imarlı arsa!",
-                     "Geleceğin kazanç kapısı bu arsada!"),
-            "modern": ("EKİN GAYRİMENKUL'DEN İMARLI & HAZIR ARSA 🏡",
-                       "Tüm altyapısı tamam, hemen yapılaşmaya uygun köşe parsel arsa.",
+            "luks": (f"EKİN GAYRİMENKUL'DEN YATIRIMA ÇOK UYGUN {base_name} 🌟",
+                     f"Şehrin gelişen bölgesinde, yüksek prim potansiyelli {emlak_turu.lower()}!",
+                     "Geleceğin kazanç kapısı bu {emlak_turu.lower()}da!"),
+            "modern": (f"EKİN GAYRİMENKUL'DEN {base_name} İMARLI & HAZIR 🏞️",
+                       f"Tüm altyapısı tamam, hemen kullanım için uygun {emlak_turu.lower()}.",
                        "Hayalinizdeki projeyi hayata geçirmek için ideal!"),
-            "firsat": ("EKİN GAYRİMENKUL'DEN FIRSAT ARSA 💎",
-                       "Bütçe dostu fiyata, değeri hızla yükselen bölgede satılık arsa!",
-                       "Yatırımın en güvenli adresi: Toprak!")
+            "firsat": (f"EKİN GAYRİMENKUL'DEN FIRSAT {base_name} 💎",
+                       f"Bütçe dostu fiyata, değeri hızla yükselen bölgede {emlak_turu.lower()}!",
+                       "Yatırımın en güvenli adresi!")
         }
 
     baslik, giris, kapanis = ton_metni[ton_key]
@@ -235,7 +242,13 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
 
     # Detaylar
     ilan += "🔹 DETAYLAR 🔹\n"
-    if emlak_turu != "Arsa":
+    if emlak_turu in ["Arsa", "Tarla"]:
+        if alan_donum: ilan += f"• {'Arsa' if emlak_turu == 'Arsa' else 'Tarla'} Alanı: {alan_donum} dönüm\n"
+        if imar_durumu: ilan += f"• İmar: {imar_durumu}\n"
+        # Yol Durumu (Arsa ve Tarla için)
+        if yol_durumu != "Bilinmiyor":
+            ilan += f"• Yol Durumu: {yol_durumu}\n"
+    else:
         if oda_bilgi: ilan += f"• {'Oda' if emlak_turu == 'Daire' else 'Düzen'}: {oda_bilgi}\n"
         if alan_net or alan_brut:
             ilan += f"• Alan: {alan_net or '?'} m² net / {alan_brut or '?'} m² brüt\n"
@@ -252,11 +265,8 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
                 ilan += f"• Isıtma: {', '.join(aktif_isitma)}\n"
             elif "Isıtma Yok" in isitma_secilen:
                 ilan += "• Isıtma: Yok\n"
-    else:
-        if arsa_m2: ilan += f"• Arsa Alanı: {arsa_m2} m²\n"
-        if imar_durumu: ilan += f"• İmar: {imar_durumu}\n"
 
-    # YENİ: Krediye Uygunluk (arsa dahil satılık her türde)
+    # Krediye Uygunluk
     if ilan_turu == "🟢 Satılık" and kredi_uygun != "Bilinmiyor":
         ilan += f"• Krediye Uygunluk: {kredi_uygun}\n"
 
@@ -289,9 +299,9 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
 
     # Sahibinden kısa başlık
     alan_kisa = ""
-    if emlak_turu == "Arsa" and arsa_m2:
-        alan_kisa = arsa_m2 + "m² "
-    elif emlak_turu != "Arsa" and alan_net:
+    if emlak_turu in ["Arsa", "Tarla"] and alan_donum:
+        alan_kisa = alan_donum + " dönüm "
+    elif emlak_turu not in ["Arsa", "Tarla"] and alan_net:
         alan_kisa = alan_net + "m² "
 
     kisa_baslik = f"{alan_kisa}{ilce or ''} {mahalle or ''} {ilan_turu[2:]} {emlak_turu}".strip()
