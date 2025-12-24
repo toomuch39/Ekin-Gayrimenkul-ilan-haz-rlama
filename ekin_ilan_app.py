@@ -48,7 +48,7 @@ with col_loc3:
 st.subheader("🔹 Temel Bilgiler")
 col1, col2, col3 = st.columns(3)
 
-# Tüm değişkenleri önceden boş olarak tanımla (NameError önleme)
+# Tüm değişkenleri önceden tanımla
 oda_bilgi = kat_bilgi = fiyat_gir = kira_gir = depozito_gir = ""
 alan_net = alan_brut = bina_kat_sayisi = yas = aidat = arsa_donum = imar_durumu = cephe_metre = ""
 balkon_bilgi = ""
@@ -56,7 +56,7 @@ teras_var = False
 kredi_uygun = "Bilinmiyor"
 yol_durumu = "Bilinmiyor"
 
-# Özellik listeleri (her zaman tanımlı olsun)
+# Özellik listeleri (boş olarak başla)
 konum_oz = manzara = bina_oz = ic_oz = cephe = teknik_oz = isitma_secilen = []
 
 with col1:
@@ -130,14 +130,14 @@ with tab1:
         ["Deniz", "Şehir", "Cadde", "Doğa/Orman", "Panoramik"])
 
 with tab2:
+    bina_oz = []
     if emlak_turu not in ["Arsa", "Tarla"]:
         bina_oz = st.multiselect("Bina & Site özellikleri",
             ["Asansör", "Kapalı otopark", "Açık otopark", "7/24 güvenlik", "Kamera sistemi",
              "Site içinde", "Kapıcı", "Çocuk parkı", "Yüzme havuzu", "Spor salonu", "Jeneratör"])
-    else:
-        bina_oz = []
 
 with tab3:
+    ic_oz = []
     if emlak_turu == "Daire":
         ic_oz = st.multiselect("Daire içi özellikler",
             ["Geniş ferah", "Ebeveyn banyolu", "Giyinme odası", "Ankastre mutfak", "Çamaşır odası",
@@ -146,8 +146,6 @@ with tab3:
         ic_oz = st.multiselect("İç özellikler",
             ["Vitrinli", "Yüksek tavan", "WCli", "Hazır bölmeli", "Boyalı&Temiz", "Klimalı",
              "Panjur/Kepenk", "Yangın çıkışı", "Asma tavan", "Spot aydınlatma"])
-    else:
-        ic_oz = []
     cephe = st.multiselect("Cephe", ["Güney", "Kuzey", "Doğu", "Batı", "Köşe cephe"])
 
 with tab4:
@@ -155,7 +153,7 @@ with tab4:
         ["Deprem yönetmeliğine uygun", "Fiber internet", "Uydu altyapısı", "Eşyalı",
          "Takas mümkün", "Krediye uygun", "Kira getirisi yüksek"])
 
-# Özellikleri birleştir (NameError önlemek için hepsi tanımlı)
+# Özellikleri birleştir
 secilen_oz = konum_oz + manzara + bina_oz + ic_oz + cephe + teknik_oz + isitma_secilen
 if emlak_turu == "Daire" and teras_var:
     secilen_oz.append("Teraslı")
@@ -163,7 +161,7 @@ secilen_madde = [f"• {oz}" for oz in secilen_oz if oz]
 
 # İLAN OLUŞTUR
 if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
-    # Fiyat/Kira (temizlenmiş hali)
+    # Fiyat/Kira
     if ilan_turu == "🟢 Satılık":
         if fiyat_gir:
             temiz = re.sub(r'[^0-9]', '', str(fiyat_gir).strip())
@@ -179,7 +177,6 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
             fiyat_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 FİYAT: {fiyat_metni} 💰"
     else:
-        # Kira için benzer temizleme
         if kira_gir:
             temiz = re.sub(r'[^0-9]', '', str(kira_gir).strip())
             try:
@@ -193,13 +190,140 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
         else:
             kira_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 AYLIK KİRA: {kira_metni} 💰"
-        # Depozito benzer şekilde
+        if depozito_gir:
+            temiz_depo = re.sub(r'[^0-9]', '', str(depozito_gir).strip())
+            try:
+                depo = int(temiz_depo)
+                if depo > 0:
+                    depo_metni = f"{depo:,}.- TL".replace(",", ".")
+                    fiyat_satiri += f"\n🔒 DEPOZİTO: {depo_metni}"
+            except ValueError:
+                pass
 
-    # ... (ilan metni, hashtag'ler, kısa başlık kısmı aynı kalıyor)
+    # Başlık ve metinler
+    base_name = emlak_turu if emlak_turu != "Daire" else "DAİRE"
+    islem_kisa = "SATILIK" if ilan_turu == "🟢 Satılık" else "KİRALIK"
+
+    ton_metni = {
+        "luks": (f"EKİN GAYRİMENKUL'DEN {islem_kisa} ULTRA LÜKS {base_name.upper()} 🏰",
+                 f"En prestijli lokasyonda, üst düzey işçilik ve malzemelerle donatılmış eşsiz bir {emlak_turu.lower()}!",
+                 "Elit yaşamın ve yüksek getirinin adresi, kaçırılmayacak fırsat!"),
+        "modern": (f"EKİN GAYRİMENKUL'DEN {islem_kisa} MODERN {base_name.upper()} 🏢",
+                   f"Merkezi konumda, şık tasarım ve kaliteli donanımıyla dikkat çeken modern bir {emlak_turu.lower()}.",
+                   "Konfor, erişilebilirlik ve değer artışı bir arada."),
+        "firsat": (f"EKİN GAYRİMENKUL'DEN {islem_kisa} FIRSAT {base_name.upper()} 💎",
+                   f"Yüksek potansiyelli bölgede, uygun fiyatıyla hem kullanım hem yatırım için ideal {emlak_turu.lower()}.",
+                   "Değerini hızla katlayacak bu fırsatı değerlendirin!")
+    }
+
+    if emlak_turu in ["Arsa", "Tarla"]:
+        base_name = "ARSA" if emlak_turu == "Arsa" else "TARLA"
+        ton_metni = {
+            "luks": (f"EKİN GAYRİMENKUL'DEN YATIRIMA ÇOK UYGUN {base_name} 🌟",
+                     f"Şehrin gelişen bölgesinde, yüksek prim potansiyelli {emlak_turu.lower()}!",
+                     "Geleceğin kazanç kapısı bu {emlak_turu.lower()}da!"),
+            "modern": (f"EKİN GAYRİMENKUL'DEN {base_name} İMARLI & HAZIR 🏞️",
+                       f"Tüm altyapısı tamam, hemen kullanım için uygun {emlak_turu.lower()}.",
+                       "Hayalinizdeki projeyi hayata geçirmek için ideal!"),
+            "firsat": (f"EKİN GAYRİMENKUL'DEN FIRSAT {base_name} 💎",
+                       f"Bütçe dostu fiyata, değeri hızla yükselen bölgede {emlak_turu.lower()}!",
+                       "Yatırımın en güvenli adresi!")
+        }
+
+    baslik, giris, kapanis = ton_metni[ton_key]
+
+    ilan = f"🏠 {baslik} 🏠\n\n"
+
+    # Konum
+    if ilce or mahalle:
+        konum_str = il
+        if ilce: konum_str += f" / {ilce}"
+        if mahalle: konum_str += f" / {mahalle}"
+        ilan += f"📍 Konum: {konum_str}\n\n"
+
+    # Detaylar
+    ilan += "🔹 DETAYLAR 🔹\n"
+    if emlak_turu in ["Arsa", "Tarla"]:
+        if arsa_donum:
+            try:
+                donum = float(arsa_donum.replace(",", "."))
+                if donum < 1:
+                    m2 = int(donum * 1000)
+                    ilan += f"• {'Arsa' if emlak_turu == 'Arsa' else 'Tarla'} Alanı: {donum} dönüm ({m2} m²)\n"
+                else:
+                    ilan += f"• {'Arsa' if emlak_turu == 'Arsa' else 'Tarla'} Alanı: {donum} dönüm\n"
+            except ValueError:
+                ilan += f"• {'Arsa' if emlak_turu == 'Arsa' else 'Tarla'} Alanı: {arsa_donum} dönüm\n"
+        if imar_durumu: ilan += f"• İmar: {imar_durumu}\n"
+        if yol_durumu != "Bilinmiyor":
+            ilan += f"• Yol Durumu: {yol_durumu}\n"
+    else:
+        if oda_bilgi: ilan += f"• {'Oda' if emlak_turu == 'Daire' else 'Düzen'}: {oda_bilgi}\n"
+        if alan_net or alan_brut:
+            ilan += f"• Alan: {alan_net or '?'} m² net / {alan_brut or '?'} m² brüt\n"
+        if kat_bilgi: ilan += f"• Kat: {kat_bilgi}\n"
+        if bina_kat_sayisi: ilan += f"• Bina: {bina_kat_sayisi} katlı\n"
+        if yas: ilan += f"• Yaş: {yas}\n"
+        if aidat: ilan += f"• Aidat: {aidat}\n"
+        if cephe_metre: ilan += f"• Cephe: {cephe_metre} metre\n"
+        if emlak_turu == "Daire" and balkon_bilgi:
+            ilan += f"• Balkon: {balkon_bilgi}\n"
+        if isitma_secilen:
+            aktif_isitma = [i for i in isitma_secilen if i != "Isıtma Yok"]
+            if aktif_isitma:
+                ilan += f"• Isıtma: {', '.join(aktif_isitma)}\n"
+            elif "Isıtma Yok" in isitma_secilen:
+                ilan += "• Isıtma: Yok\n"
+
+    # Krediye Uygunluk
+    if ilan_turu == "🟢 Satılık" and kredi_uygun != "Bilinmiyor":
+        ilan += f"• Krediye Uygunluk: {kredi_uygun}\n"
+
+    if tapu: ilan += f"• Tapu: {', '.join(tapu)}\n"
+    ilan += "\n"
+
+    ilan += f"{fiyat_satiri}\n\n"
+    ilan += f"{giris}\n\n"
+
+    if secilen_madde:
+        ilan += "⭐ ÖNE ÇIKAN ÖZELLİKLER ⭐\n" + "\n".join(secilen_madde) + "\n\n"
+
+    ilan += f"{kapanis}\n\n"
+
+    # Hashtag'ler
+    hashtag_list = ["#EkinGayrimenkul", "#Emlak", "#Gayrimenkul"]
+    hashtag_list.append("#Satılık" if ilan_turu == "🟢 Satılık" else "#Kiralık")
+    hashtag_list.append(f"#{emlak_turu.replace(' / ', '').replace(' ', '')}")
+    if ilce: hashtag_list.append(f"#{ilce.replace(' ', '')}")
+    if mahalle: hashtag_list.append(f"#{mahalle.split()[0]}Mah")
+    if ton_key == "luks": hashtag_list += ["#LüksEmlak", "#Prestij"]
+    elif ton_key == "modern": hashtag_list += ["#ModernTasarım", "#Konfor"]
+    else: hashtag_list += ["#Fırsat", "#Yatırım"]
+
+    ilan += " ".join(hashtag_list) + "\n\n"
+
+    ilan += "📞 Hemen bilgi ve görüşme için arayın:\n"
+    ilan += "📞 0545 920 03 40\n📞 0545 920 03 46\n\n"
+    ilan += "EKİN GAYRİMENKUL DANIŞMANLIĞI\nHayallerinize profesyonel dokunuş ✨"
+
+    # Sahibinden kısa başlık
+    alan_kisa = ""
+    if emlak_turu in ["Arsa", "Tarla"] and arsa_donum:
+        alan_kisa = arsa_donum + " dönüm "
+    elif emlak_turu not in ["Arsa", "Tarla"] and alan_net:
+        alan_kisa = alan_net + "m² "
+
+    kisa_baslik = f"{alan_kisa}{ilce or ''} {mahalle or ''} {ilan_turu[2:]} {emlak_turu}".strip()
+    kisa_baslik = " ".join(kisa_baslik.split())
+    if len(kisa_baslik) > 70:
+        kisa_baslik = kisa_baslik[:67] + "..."
 
     st.success("✅ İlan başarıyla hazırlandı!")
+
     st.markdown("### 📋 Oluşturulan İlan")
     st.text_area("İlan Metni (Ctrl+A → Ctrl+C ile kopyala)", ilan, height=650)
+
     st.markdown("### 📌 Sahibinden.com İçin Önerilen Başlık")
     st.code(kisa_baslik, language=None)
-    st.info("💡 Tüm platformlarda doğrudan kullanabilirsiniz!")
+
+    st.info("💡 Tüm platformlarda (Sahibinden, Hepsiemlak, WhatsApp, Instagram) doğrudan kullanabilirsiniz!")
