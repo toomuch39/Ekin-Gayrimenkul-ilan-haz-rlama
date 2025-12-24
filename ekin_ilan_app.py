@@ -1,7 +1,9 @@
 import streamlit as st
 
 st.set_page_config(page_title="Ekin Gayrimenkul Pro İlan", layout="wide")
+
 st.image("logo.png", use_container_width=True)
+
 st.title("🏠 EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU")
 st.markdown("Daire, dükkan, ofis, arsa... Her türlü emlak ilanınızı saniyeler içinde profesyonelce hazırlayın!")
 
@@ -61,6 +63,7 @@ imar_durumu = ""
 cephe_metre = ""
 balkon_bilgi = ""
 teras_var = False
+kredi_uygun = "Bilinmiyor"  # Krediye Uygunluk
 
 with col1:
     if emlak_turu in ["Daire", "Dükkan / Mağaza", "Ofis / İşyeri"]:
@@ -80,6 +83,10 @@ with col2:
     else:
         arsa_m2 = st.text_input("🌳 Arsa Alanı m² (örn: 500)")
         imar_durumu = st.text_input("📜 İmar Durumu (örn: Konut İmarlı, 0.60 Emsal)")
+    
+    # YENİ: Krediye Uygunluk (satılık ilanlarda her türde görünür)
+    if ilan_turu == "🟢 Satılık":
+        kredi_uygun = st.selectbox("🏦 Krediye Uygunluk", ["Evet", "Hayır", "Bilinmiyor"])
 
 with col3:
     if emlak_turu != "Arsa":
@@ -169,7 +176,6 @@ secilen_madde = [f"• {oz}" for oz in secilen_oz if oz]
 
 # İLAN OLUŞTUR
 if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
-
     # Fiyat/Kira
     if ilan_turu == "🟢 Satılık":
         if fiyat_gir.isdigit() and fiyat_gir != "0":
@@ -240,7 +246,6 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
         if cephe_metre: ilan += f"• Cephe: {cephe_metre} metre\n"
         if emlak_turu == "Daire" and balkon_bilgi:
             ilan += f"• Balkon: {balkon_bilgi}\n"
-        # Isıtma çoklu
         if isitma_secilen:
             aktif_isitma = [i for i in isitma_secilen if i != "Isıtma Yok"]
             if aktif_isitma:
@@ -250,6 +255,10 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
     else:
         if arsa_m2: ilan += f"• Arsa Alanı: {arsa_m2} m²\n"
         if imar_durumu: ilan += f"• İmar: {imar_durumu}\n"
+
+    # YENİ: Krediye Uygunluk (arsa dahil satılık her türde)
+    if ilan_turu == "🟢 Satılık" and kredi_uygun != "Bilinmiyor":
+        ilan += f"• Krediye Uygunluk: {kredi_uygun}\n"
 
     if tapu: ilan += f"• Tapu: {', '.join(tapu)}\n"
     ilan += "\n"
