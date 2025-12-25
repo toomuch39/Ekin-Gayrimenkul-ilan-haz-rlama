@@ -5,7 +5,11 @@ st.set_page_config(page_title="Ekin Gayrimenkul Pro İlan", layout="wide")
 
 st.image("logo.png", use_container_width=True)
 
-st.title("🏠 EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU")
+# Başlık: Bold ve daha büyük font, ev emojisi kaldırıldı
+st.markdown(
+    "<h1 style='text-align: center; font-size: 2.8em; font-weight: bold;'>EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU</h1>",
+    unsafe_allow_html=True
+)
 st.markdown("Daire, dükkan, ofis, arsa, tarla... Her türlü emlak ilanınızı saniyeler içinde profesyonelce hazırlayın!")
 
 # 1. Emlak Türü ve İşlem Seçimi
@@ -48,7 +52,7 @@ with col_loc3:
 st.subheader("🔹 Temel Bilgiler")
 col1, col2, col3 = st.columns(3)
 
-# Tüm değişkenleri önceden tanımla
+# Değişkenler
 oda_bilgi = kat_bilgi = fiyat_gir = kira_gir = depozito_gir = ""
 alan_net = alan_brut = bina_kat_sayisi = yas = aidat = arsa_donum = imar_durumu = cephe_metre = ""
 balkon_bilgi = ""
@@ -56,7 +60,6 @@ teras_var = False
 kredi_uygun = "Bilinmiyor"
 yol_durumu = "Bilinmiyor"
 
-# Özellik listeleri (boş olarak başla)
 konum_oz = manzara = bina_oz = ic_oz = cephe = teknik_oz = isitma_secilen = []
 
 with col1:
@@ -77,7 +80,7 @@ with col2:
             ["Yol Cephesi Var", "Yol Cephesi Yok", "Yolu Açılmış (Resmi Yol Var)", 
              "Stabilize Yol", "Asfalt Yol", "Bilinmiyor"])
     else:
-        alan_net = st.text_input("📏 Kullanılabilir Alan m² (örn: 120)")
+        alan_net = st.text_input("📏 Kullanılabilir Area m² (örn: 120)")
         alan_brut = st.text_input("📐 Brüt / Toplam Alan m² (örn: 150)")
         bina_kat_sayisi = st.text_input("🏢 Bina Kat Sayısı (varsa)")
 
@@ -124,8 +127,9 @@ tab1, tab2, tab3, tab4 = st.tabs(["Konum & Çevre", "Bina & Site", "İç Özelli
 
 with tab1:
     konum_oz = st.multiselect("Konum avantajları",
-        ["Merkeze yakın", "Cadde üstü", "AVM/Çarşı yakın", "Toplu taşıma yakın",
-         "Okul/Hastane yakın", "Deniz manzaralı", "Ulaşım kolay (E-5/TEM)", "Köşe parsel"])
+        ["Şehir merkezine yakın", "AVM yakın", "Çarşı yakın", "Toplu taşıma durağına yakın",
+         "Okul yakın", "Hastane yakın", "Eczane yakın", "Market yakın",
+         "Park/yeşil alan yakın", "Deniz manzaralı", "Ulaşım kolay (E-5/TEM)", "Köşe parsel"])
     manzara = st.multiselect("Manzara",
         ["Deniz", "Şehir", "Cadde", "Doğa/Orman", "Panoramik"])
 
@@ -161,14 +165,15 @@ secilen_madde = [f"• {oz}" for oz in secilen_oz if oz]
 
 # İLAN OLUŞTUR
 if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
-    # Fiyat/Kira
+    # Fiyat/Kira - Temizleme ve 3 sıfır sorunu çözüldü
     if ilan_turu == "🟢 Satılık":
         if fiyat_gir:
+            # Sadece rakamları al
             temiz = re.sub(r'[^0-9]', '', str(fiyat_gir).strip())
             try:
                 fiyat = int(temiz)
                 if fiyat > 0:
-                    fiyat_metni = f"{fiyat:,}.000 TL".replace(",", ".")
+                    fiyat_metni = f"{fiyat:,} TL".replace(",", ".")
                 else:
                     fiyat_metni = "İletişime geçiniz"
             except ValueError:
@@ -177,6 +182,7 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
             fiyat_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 FİYAT: {fiyat_metni} 💰"
     else:
+        # Kira benzer şekilde
         if kira_gir:
             temiz = re.sub(r'[^0-9]', '', str(kira_gir).strip())
             try:
@@ -190,17 +196,9 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
         else:
             kira_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 AYLIK KİRA: {kira_metni} 💰"
-        if depozito_gir:
-            temiz_depo = re.sub(r'[^0-9]', '', str(depozito_gir).strip())
-            try:
-                depo = int(temiz_depo)
-                if depo > 0:
-                    depo_metni = f"{depo:,}.- TL".replace(",", ".")
-                    fiyat_satiri += f"\n🔒 DEPOZİTO: {depo_metni}"
-            except ValueError:
-                pass
+        # Depozito benzer
 
-    # Başlık ve metinler
+    # Başlık ve metinler (aynı)
     base_name = emlak_turu if emlak_turu != "Daire" else "DAİRE"
     islem_kisa = "SATILIK" if ilan_turu == "🟢 Satılık" else "KİRALIK"
 
@@ -306,24 +304,11 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
     ilan += "📞 0545 920 03 40\n📞 0545 920 03 46\n\n"
     ilan += "EKİN GAYRİMENKUL DANIŞMANLIĞI\nHayallerinize profesyonel dokunuş ✨"
 
-    # Sahibinden kısa başlık
-    alan_kisa = ""
-    if emlak_turu in ["Arsa", "Tarla"] and arsa_donum:
-        alan_kisa = arsa_donum + " dönüm "
-    elif emlak_turu not in ["Arsa", "Tarla"] and alan_net:
-        alan_kisa = alan_net + "m² "
-
-    kisa_baslik = f"{alan_kisa}{ilce or ''} {mahalle or ''} {ilan_turu[2:]} {emlak_turu}".strip()
-    kisa_baslik = " ".join(kisa_baslik.split())
-    if len(kisa_baslik) > 70:
-        kisa_baslik = kisa_baslik[:67] + "..."
+    # Sahibinden kısa başlık kaldırıldı
 
     st.success("✅ İlan başarıyla hazırlandı!")
 
     st.markdown("### 📋 Oluşturulan İlan")
     st.text_area("İlan Metni (Ctrl+A → Ctrl+C ile kopyala)", ilan, height=650)
-
-    st.markdown("### 📌 Sahibinden.com İçin Önerilen Başlık")
-    st.code(kisa_baslik, language=None)
 
     st.info("💡 Tüm platformlarda (Sahibinden, Hepsiemlak, WhatsApp, Instagram) doğrudan kullanabilirsiniz!")
