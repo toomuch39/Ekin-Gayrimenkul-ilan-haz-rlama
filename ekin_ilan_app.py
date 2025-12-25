@@ -5,7 +5,6 @@ st.set_page_config(page_title="Ekin Gayrimenkul Pro İlan", layout="wide")
 
 st.image("logo.png", use_container_width=True)
 
-# Başlık: Bold ve daha büyük font, ev emojisi kaldırıldı
 st.markdown(
     "<h1 style='text-align: center; font-size: 2.8em; font-weight: bold;'>EKİN GAYRİMENKUL - PROFESYONEL İLAN OLUŞTURUCU</h1>",
     unsafe_allow_html=True
@@ -52,7 +51,6 @@ with col_loc3:
 st.subheader("🔹 Temel Bilgiler")
 col1, col2, col3 = st.columns(3)
 
-# Değişkenler
 oda_bilgi = kat_bilgi = fiyat_gir = kira_gir = depozito_gir = ""
 alan_net = alan_brut = bina_kat_sayisi = yas = aidat = arsa_donum = imar_durumu = cephe_metre = ""
 balkon_bilgi = ""
@@ -80,7 +78,7 @@ with col2:
             ["Yol Cephesi Var", "Yol Cephesi Yok", "Yolu Açılmış (Resmi Yol Var)", 
              "Stabilize Yol", "Asfalt Yol", "Bilinmiyor"])
     else:
-        alan_net = st.text_input("📏 Kullanılabilir Area m² (örn: 120)")
+        alan_net = st.text_input("📏 Kullanılabilir Alan m² (örn: 120)")
         alan_brut = st.text_input("📐 Brüt / Toplam Alan m² (örn: 150)")
         bina_kat_sayisi = st.text_input("🏢 Bina Kat Sayısı (varsa)")
 
@@ -163,17 +161,24 @@ if emlak_turu == "Daire" and teras_var:
     secilen_oz.append("Teraslı")
 secilen_madde = [f"• {oz}" for oz in secilen_oz if oz]
 
+# YENİ: Özel Notlar bölümü
+st.subheader("📝 Özel Notlar (İsteğe bağlı)")
+ozel_notlar = st.text_area(
+    "İlanla ilgili özel notlarınızı buraya yazın (her satır ayrı bir not olabilir):",
+    height=150,
+    placeholder="Örn:\nSahibi acil satmak istiyor\nTakas kabul edebilir\nEmlakçıya özel bilgi: Görüşme için önceden ara..."
+)
+
 # İLAN OLUŞTUR
 if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
-    # Fiyat/Kira - Temizleme ve 3 sıfır sorunu çözüldü
+    # Fiyat/Kira
     if ilan_turu == "🟢 Satılık":
         if fiyat_gir:
-            # Sadece rakamları al
             temiz = re.sub(r'[^0-9]', '', str(fiyat_gir).strip())
             try:
                 fiyat = int(temiz)
                 if fiyat > 0:
-                    fiyat_metni = f"{fiyat:,} TL".replace(",", ".")
+                    fiyat_metni = f"{fiyat:,}.000 TL".replace(",", ".")
                 else:
                     fiyat_metni = "İletişime geçiniz"
             except ValueError:
@@ -182,7 +187,6 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
             fiyat_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 FİYAT: {fiyat_metni} 💰"
     else:
-        # Kira benzer şekilde
         if kira_gir:
             temiz = re.sub(r'[^0-9]', '', str(kira_gir).strip())
             try:
@@ -196,9 +200,17 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
         else:
             kira_metni = "İletişime geçiniz"
         fiyat_satiri = f"💰 AYLIK KİRA: {kira_metni} 💰"
-        # Depozito benzer
+        if depozito_gir:
+            temiz_depo = re.sub(r'[^0-9]', '', str(depozito_gir).strip())
+            try:
+                depo = int(temiz_depo)
+                if depo > 0:
+                    depo_metni = f"{depo:,}.- TL".replace(",", ".")
+                    fiyat_satiri += f"\n🔒 DEPOZİTO: {depo_metni}"
+            except ValueError:
+                pass
 
-    # Başlık ve metinler (aynı)
+    # Başlık ve metinler
     base_name = emlak_turu if emlak_turu != "Daire" else "DAİRE"
     islem_kisa = "SATILIK" if ilan_turu == "🟢 Satılık" else "KİRALIK"
 
@@ -304,7 +316,10 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
     ilan += "📞 0545 920 03 40\n📞 0545 920 03 46\n\n"
     ilan += "EKİN GAYRİMENKUL DANIŞMANLIĞI\nHayallerinize profesyonel dokunuş ✨"
 
-    # Sahibinden kısa başlık kaldırıldı
+    # YENİ: Özel Notlar ekleme
+    if ozel_notlar.strip():
+        ilan += "\n\n📝 ÖZEL NOTLAR:\n"
+        ilan += ozel_notlar.strip() + "\n"
 
     st.success("✅ İlan başarıyla hazırlandı!")
 
