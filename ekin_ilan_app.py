@@ -313,7 +313,7 @@ if st.button("🚀 İLANI OLUŞTUR", type="primary", use_container_width=True):
     ilan += " ".join(hashtag_list) + "\n\n"
 
     ilan += "📞 Hemen bilgi ve görüşme için arayın:\n"
-    ilan += "📞 0545 920 03 40\n📞 0545 920 03 46\n\n"
+    ilan += "📞 0545 920 03 46\n📞 0545 920 03 40\n\n"
     ilan += "EKİN GAYRİMENKUL DANIŞMANLIĞI\nHayallerinize profesyonel dokunuş ✨"
 
     # YENİ: Özel Notlar ekleme
